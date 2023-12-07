@@ -87,6 +87,8 @@ class S3CacheStorage(object):
         self.use_gzip = settings.getbool('HTTPCACHE_GZIP')
         self.dont_retrieve = settings.getbool('S3CACHE_DONT_RETRIEVE')
 
+        self.endpoint_url = settings.get('S3CACHE_ENDPOINT_URL')
+
         self._client = None
         self._spider = None
         self._keypath = None
@@ -106,7 +108,10 @@ class S3CacheStorage(object):
     def client(self):
         """ Connect to S3 and return the connection """
         if self._client is None:
-            self._client = boto3.client('s3', aws_access_key_id=self.access_key, aws_secret_access_key=self.secret_key)
+            if self.endpoint_url is not None:
+                self._client = boto3.client('s3', endpoint_url=self.endpoint_url, aws_access_key_id=self.access_key, aws_secret_access_key=self.secret_key)
+            else:
+                self._client = boto3.client('s3', aws_access_key_id=self.access_key, aws_secret_access_key=self.secret_key)
         return self._client
 
     @property
